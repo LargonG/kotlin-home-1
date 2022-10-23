@@ -98,4 +98,27 @@ internal class NDArrayTest {
         assertEquals(58, data.at(DefaultPoint(0, 1)))
         assertEquals(2, data.at(DefaultPoint(0, 2)))
     }
+
+    @Test
+    fun testDot() {
+        val data = DefaultNDArray.ones(DefaultShape(4, 5))
+        val data2 = DefaultNDArray.ones(DefaultShape(5))
+
+        for (i in 0 until data2.dim(0)) {
+            data2.set(DefaultPoint(i), i + 1);
+        }
+
+        for (i in 0 until data.dim(0)) {
+            for (j in 0 until data.dim(1)) {
+                data.set(DefaultPoint(i, j), i * 10 + j)
+            }
+        }
+
+        val res = data.dot(data2)
+
+        assertEquals(40, res.at(DefaultPoint(0)))
+        assertEquals(190, res.at(DefaultPoint(1)))
+        assertEquals(340, res.at(DefaultPoint(2)))
+        assertEquals(490, res.at(DefaultPoint(3)))
+    }
 }
