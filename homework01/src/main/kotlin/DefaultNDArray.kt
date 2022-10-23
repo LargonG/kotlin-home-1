@@ -111,7 +111,7 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
         this.value[getIndex(point)] = value
     }
 
-    override fun copy(): NDArray = DefaultNDArray(value.clone(), shape)
+    override fun copy(): NDArray = DefaultNDArray(value.copyOf(), shape)
 
     override fun view(): NDArray = this
 
@@ -138,6 +138,13 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
     }
 
     override fun dot(other: NDArray): NDArray {
+        if (ndim != 2) {
+            throw NDArrayException.IllegalNDArrayDimension(ndim, "2");
+        }
+        if (other.ndim > 2) {
+            throw NDArrayException.IllegalNDArrayDimension(other.ndim, "1 or 2");
+        }
+
         val shape = if (other.ndim == 2) DefaultShape(dim(0), other.dim(1)) else DefaultShape(dim(0))
         val result = zeros(shape);
         for (i in 0 until dim(0)) {
@@ -225,4 +232,7 @@ sealed class NDArrayException(reason: String = "") : Exception(reason) {
         NDArrayException("Illegal dimensions count. found: ${found}, excepted: ${expected}") {
 
     }
+
+    class IllegalNDArrayDimension(val found: Int, val expected: String) :
+            NDArrayException("Illegal dimensions of shape: found: ${found}, expected: ${expected}")
 }
