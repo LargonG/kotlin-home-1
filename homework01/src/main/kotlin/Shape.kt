@@ -39,11 +39,11 @@ class DefaultShape(private vararg val dimensions: Int): Shape {
 }
 
 sealed class ShapeArgumentException (reason: String = "") : IllegalArgumentException(reason) {
-    class EmptyShapeException(reason: String = "") : ShapeArgumentException(reason) {
+    class EmptyShapeException() : ShapeArgumentException("empty shape is not possible") {
 
     }
 
-    class NonPositiveDimensionException(val index: Int, val value: Int, reason: String = ""):
-        ShapeArgumentException(reason) {
+    class NonPositiveDimensionException(val index: Int, val value: Int):
+        ShapeArgumentException("At position: ${index} found: ${value}") {
     }
 }

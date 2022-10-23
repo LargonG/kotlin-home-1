@@ -216,13 +216,13 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
 }
 
 sealed class NDArrayException(reason: String = "") : Exception(reason) {
-    class IllegalPointCoordinateException(val index: Int, val value: Int, reason: String = "") :
-        NDArrayException(reason) {
+    class IllegalPointCoordinateException(val index: Int, val value: Int) :
+        NDArrayException("Illegal coordinate in point at position ${index}, value: ${value}") {
 
     }
 
-    class IllegalPointDimensionException(val found: Int, val expected: Int, reason: String = "") :
-        NDArrayException(reason) {
+    class IllegalPointDimensionException(val found: Int, val expected: Int) :
+        NDArrayException("Illegal dimensions count. found: ${found}, excepted: ${expected}") {
 
     }
 }
