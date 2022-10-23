@@ -138,7 +138,8 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
     }
 
     override fun dot(other: NDArray): NDArray {
-        val result = zeros(getShape(other));
+        val shape = if (other.ndim == 2) DefaultShape(dim(0), other.dim(1)) else DefaultShape(dim(0))
+        val result = zeros(shape);
         for (i in 0 until dim(0)) {
             for (j in 0 until dim(1)) {
                 for (k in 0 until other.dim(0)) {
@@ -215,7 +216,6 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
 }
 
 sealed class NDArrayException(reason: String = "") : Exception(reason) {
-    /* TODO: реализовать требуемые исключения */
     class IllegalPointCoordinateException(val index: Int, val value: Int, reason: String = "") :
         NDArrayException(reason) {
 
