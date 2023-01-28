@@ -30,20 +30,12 @@ class DefaultShape(private vararg val dimensions: Int): Shape {
 
     override fun dim(i: Int): Int = dimensions[i]
 
-    override val size: Int
-        get() {
-            var result = 1
-            dimensions.forEach { result *= it }
-            return result
-        }
+    override val size: Int by lazy { dimensions.fold(1) {base, cur -> base * cur} }
 }
 
 sealed class ShapeArgumentException (reason: String = "") : IllegalArgumentException(reason) {
-    class EmptyShapeException() : ShapeArgumentException("empty shape is not possible") {
+    class EmptyShapeException: ShapeArgumentException("empty shape is not possible")
 
-    }
-
-    class NonPositiveDimensionException(val index: Int, val value: Int):
-        ShapeArgumentException("At position: ${index} found: ${value}") {
-    }
+    class NonPositiveDimensionException(index: Int, value: Int):
+        ShapeArgumentException("At position: $index found: $value")
 }

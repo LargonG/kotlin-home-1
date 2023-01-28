@@ -1,3 +1,5 @@
+import kotlin.math.min
+
 interface NDArray : SizeAware, DimensionAware {
     /*
      * Получаем значение по индексу point
@@ -113,7 +115,12 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
 
     override fun copy(): NDArray = DefaultNDArray(value.copyOf(), shape)
 
-    override fun view(): NDArray = this
+    override fun view(): NDArray {
+        val delegate: NDArray by this
+        return delegate
+    }
+
+    private operator fun getValue(thisRef: Any?, property: Any?): NDArray = this
 
     override fun add(other: NDArray) {
         if (other.ndim > ndim || other.ndim < ndim - 1 || !hasTheSameShapeWeak(other)) {
@@ -124,12 +131,12 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
         val shape = getShape(other)
         do {
             if (shape.ndim == ndim) {
-                val point = DefaultPoint(*iter)
+                val point = DefaultPoint(iter)
                 set(point, at(point) + other.at(point))
             } else {
                 for (i in 0 until dim(ndim - 1)) {
-                    val point = DefaultPoint(*iter + IntArray(1) { i })
-                    val pointOther = DefaultPoint(*iter)
+                    val point = DefaultPoint(iter + IntArray(1) { i })
+                    val pointOther = DefaultPoint(iter)
 
                     set(point, at(point) + other.at(pointOther))
                 }
@@ -139,14 +146,14 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
 
     override fun dot(other: NDArray): NDArray {
         if (ndim != 2) {
-            throw NDArrayException.IllegalNDArrayDimension(ndim, "2");
+            throw NDArrayException.IllegalNDArrayDimension(ndim, "2")
         }
         if (other.ndim > 2) {
-            throw NDArrayException.IllegalNDArrayDimension(other.ndim, "1 or 2");
+            throw NDArrayException.IllegalNDArrayDimension(other.ndim, "1 or 2")
         }
 
         val shape = if (other.ndim == 2) DefaultShape(dim(0), other.dim(1)) else DefaultShape(dim(0))
-        val result = zeros(shape);
+        val result = zeros(shape)
         for (i in 0 until dim(0)) {
             for (j in 0 until dim(1)) {
                 for (k in 0 until other.dim(0)) {
@@ -167,16 +174,12 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
     }
 
     private fun hasTheSameShapeWeak(other: NDArray): Boolean {
-        for (i in 0 until Math.min(ndim, other.ndim)) {
+        for (i in 0 until min(ndim, other.ndim)) {
             if (dim(i) != other.dim(i)) {
-                return false;
+                return false
             }
         }
-        return true;
-    }
-
-    private fun hasTheSameShapeStrong(other: NDArray): Boolean {
-        return ndim == other.ndim && hasTheSameShapeWeak(other)
+        return true
     }
 
     override val size
@@ -223,16 +226,12 @@ class DefaultNDArray private constructor(private val value: IntArray, private va
 }
 
 sealed class NDArrayException(reason: String = "") : Exception(reason) {
-    class IllegalPointCoordinateException(val index: Int, val value: Int) :
-        NDArrayException("Illegal coordinate in point at position ${index}, value: ${value}") {
+    class IllegalPointCoordinateException(index: Int, value: Int) :
+        NDArrayException("Illegal coordinate in point at position $index, value: $value")
 
-    }
+    class IllegalPointDimensionException(found: Int, expected: Int) :
+        NDArrayException("Illegal dimensions count. found: $found, excepted: $expected")
 
-    class IllegalPointDimensionException(val found: Int, val expected: Int) :
-        NDArrayException("Illegal dimensions count. found: ${found}, excepted: ${expected}") {
-
-    }
-
-    class IllegalNDArrayDimension(val found: Int, val expected: String) :
-            NDArrayException("Illegal dimensions of shape: found: ${found}, expected: ${expected}")
+    class IllegalNDArrayDimension(found: Int, expected: String) :
+            NDArrayException("Illegal dimensions of shape: found: $found, expected: $expected")
 }

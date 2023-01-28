@@ -1,5 +1,3 @@
-import java.lang.IllegalArgumentException
-
 interface Point: DimensionAware
 
 /**
@@ -10,9 +8,13 @@ interface Point: DimensionAware
  *
  * Сама коллекция параметров недоступна, доступ - через методы интерфейса
  */
-class DefaultPoint(private vararg val coords: Int): Point {
+@JvmInline
+value class DefaultPoint(private val coords: IntArray): Point {
     override val ndim: Int
         get() = coords.size
 
     override fun dim(i: Int) = coords[i]
+
+    // JVM clash if only vararg
+    constructor(first: Int, vararg other: Int): this(intArrayOf(first, *other))
 }
